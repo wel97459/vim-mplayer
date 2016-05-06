@@ -9,21 +9,11 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 
-if has('win32unix')
-  let g:mplayer#use_win_mplayer_in_cygwin = get(g:, 'mplayer#use_win_mplayer_in_cygwin', 0)
-endif
-
 let g:mplayer#mplayer = get(g:, 'mplayer#mplayer', 'mplayer')
-if has('win32') || has('win32unix') && g:mplayer#use_win_mplayer_in_cygwin
-  let g:mplayer#option = get(g:, 'mplayer#option',
-        \ '-nofontconfig -idle -quiet -slave -af equalizer=0:0:0:0:0:0:0:0:0:0 -vo direct3d')
-else
-  let g:mplayer#option = get(g:, 'mplayer#option',
-        \ '-nofontconfig -idle -quiet -slave -af equalizer=0:0:0:0:0:0:0:0:0:0')
-endif
+let g:mplayer#option = get(g:, 'mplayer#option',
+        \ '-idle -quiet -slave -af equalizer=0:0:0:0:0:0:0:0:0:0')
 let g:mplayer#suffixes = get(g:, 'mplayer#suffixes', ['*'])
-let g:mplayer#enable_ctrlp_multi_select = get(g:, 'mplayer#enable_ctrlp_multi_select', 1)
-
+let g:mplayer#enable_ctrlp_multi_select = 1
 
 let s:V = vital#of('mplayer')
 let s:List = s:V.import('Data.List')
@@ -34,17 +24,9 @@ let s:rt_sw = 0
 let s:PROCESS_NAME = 'mplayer' | lockvar s:PROCESS_NAME
 let s:WAIT_TIME = 0.05 | lockvar s:WAIT_TIME
 let s:EXIT_KEYCODE = char2nr('q') | lockvar s:EXIT_KEYCODE
-if has('win32unix') && g:mplayer#use_win_mplayer_in_cygwin
-  let s:TENC = 'cp932'
-else
   let s:TENC = &termencoding
-endif
 lockvar s:TENC
-if has('win32') || has('win32unix') && g:mplayer#use_win_mplayer_in_cygwin
-  let s:LINE_BREAK = "\r\n"
-else
   let s:LINE_BREAK = "\n"
-endif
 lockvar s:LINE_BREAK
 let s:DUMMY_COMMAND = 'get_property __NONE__'
 let s:DUMMY_PATTERN = '.*ANS_ERROR=PROPERTY_UNKNOWN' . s:LINE_BREAK
