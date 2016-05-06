@@ -13,70 +13,62 @@ let g:loaded_ctrlp_mplayer = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:ctrlp_builtins = ctrlp#getvar('g:ctrlp_builtins')
-
-function! s:get_sid_prefix() abort
-  return matchstr(expand('<sfile>'), '^function \zs<SNR>\d\+_\zeget_sid_prefix$')
-endfunction
-let s:sid_prefix = s:get_sid_prefix()
-delfunction s:get_sid_prefix
-
-let g:ctrlp_ext_vars = add(get(g:, 'ctrlp_ext_vars', []), {
-      \ 'init': s:sid_prefix  . 'init()',
-      \ 'accept': s:sid_prefix  . 'accept',
-      \ 'exit': s:sid_prefix  . 'exit()',
+let s:mplayer_vars = {
+      \ 'init': 'ctrlp#mplayer#init()',
+      \ 'accept': 'ctrlp#mplayer#accept',
+      \ 'exit': 'ctrlp#mplayer#exit()',
       \ 'lname': 'mplayer',
       \ 'sname': 'mplayer',
       \ 'type': 'path',
       \ 'sort': 0,
       \ 'nolim': 1,
+      \ 'multsel': 1,
       \ 'opmul': 1
-      \})
-let s:id = s:ctrlp_builtins + len(g:ctrlp_ext_vars)
-unlet s:ctrlp_builtins s:sid_prefix
+      \}
 
+if exists('g:ctrlp_ext_vars') && !empty(g:ctrlp_ext_vars)
+  let g:ctrlp_ext_vars = add(g:ctrlp_ext_vars, s:mplayer_var)
+else
+  let g:ctrlp_ext_vars = [s:mplayer_vars]
+endif
 
 function! ctrlp#mplayer#start(...) abort
-  let s:dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
-  if s:dir[-1 :] !=# '/'
-    let s:dir .= '/'
-  endif
-  call ctrlp#init(s:id, {'dir': s:dir})
+  call ctrlp#init(ctrlp#mplayer#id())
 endfunction
 
-
-function! s:init() abort
-  let glob_pattern = empty(g:mplayer#suffixes) ? '*' : ('*.{' . join(g:mplayer#suffixes, ',') . '}')
-  if g:mplayer#enable_ctrlp_multi_select
-    autocmd! MPlayer BufReadCmd
-    execute 'autocmd MPlayer BufReadCmd' glob_pattern 'call s:enqueue_hook()'
-  endif
-  let len = len(s:dir)
-  return map(split(globpath(s:dir . '**', glob_pattern, 1), "\n"), 'v:val[len :]')
+function! ctrlp#mplayer#init() abort
+  let s:candidate = ctrlp#files()
+  return s:candidate
 endfunction
 
-function! s:accept(mode, str) abort
+function! ctrlp#mplayer#accept(mode, str)
   call ctrlp#exit()
-  call mplayer#enqueue(a:str)
+  echo [a:mode, a:str]
+  cal call('mplayer#enqueue', a:str)
+" call mplayer#enqueue(a:str)
 endfunction
 
-function! s:exit() abort
+function! ctrlp#mplayer#exit() abort
   if g:mplayer#enable_ctrlp_multi_select
-    autocmd MPlayer CursorHold,CursorHoldI,CursorMoved,CursorMovedI,InsertEnter * call s:delete_autocmds_hook()
+    autocmd MPlayer CursorHold,CursorHoldI,CursorMoved,CursorMovedI,InsertEnter * call ctrlp#mplayer#delete_autocmds_hook()
   endif
 endfunction
 
 
-function! s:enqueue_hook() abort
+function! ctrlp#mplayer#enqueue_hook() abort
   call mplayer#enqueue(expand('%:p'))
   bwipeout
 endfunction
 
-function! s:delete_autocmds_hook() abort
+function! ctrlp#mplayer#delete_autocmds_hook() abort
   autocmd! MPlayer CursorHold,CursorHoldI,CursorMoved,CursorMovedI,InsertEnter *
   autocmd! MPlayer BufReadCmd
 endfunction
 
+let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
+function! ctrlp#mplayer#id()
+  return s:id
+endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
