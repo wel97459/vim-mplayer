@@ -33,24 +33,27 @@ else
 endif
 
 let s:candidate = []
-let s:suffixes = ['mp3', 'flac', 'wav', 'm3u']
+let s:suffixes = ['mp3', 'flac', 'wav']
 
 function! ctrlp#mplayer#start(...) abort
-    let dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
-    if dir[-1 :] !=# '/'
-        let dir .= '/'
-    endif
-    
-    let glob_pattern = empty(g:mplayer#suffixes) ? '*' :
-        \ ('*.{' . join(s:suffixes, ',') . '}')
-    echom glob_pattern
-    echom dir
+  let dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
+  if dir[-1 :] !=# '/'
+    let dir .= '/'
+  endif
 
-  let s:candidate = split(
-              \ globpath(dir, glob_pattern, 1) . "\n" .
-              \ globpath(dir . '**', glob_pattern, 1)
-              \ , '\n')
-  echo s:candidate
+  let glob_pattern = '\.\%(' . join(s:suffixes, '\|') . 'm3u\|m3u8\|pls\|wax\|wpl\|xspf\)$'  
+  echom glob_pattern
+  echom dir
+
+  let files  = globpath(dir, "**", 0, 1)
+  
+  let i = 0
+  while i < len(files)
+    if files[i] =~# glob_pattern
+        call add(s:candidate, files[i])
+    endif
+    let i += 1
+  endwhile
 
   call ctrlp#init(ctrlp#mplayer#id())
 endfunction
