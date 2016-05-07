@@ -43,6 +43,11 @@ command! -nargs=? -complete=dir AltiMPlayer  call alti#mplayer#start(<f-args>)
 command! -nargs=? -complete=dir MilqiMPlayer  call milqi#mplayer#start(<f-args>)
 command! -nargs=? -complete=dir FZFMPlayer  call fzf#mplayer#start(<f-args>)
 
+map <F7> :MPlayerPrev<CR>
+map <F8> :MPlayerNext<CR>
+map <F7> :MPlayerTogglePause<CR>
+map <F7> :CtrlPMPlayer<CR>
+
 
 augroup MPlayer
   autocmd!
