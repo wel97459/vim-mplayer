@@ -45,8 +45,8 @@ command! -nargs=? -complete=dir FZFMPlayer  call fzf#mplayer#start(<f-args>)
 
 map <F7> :MPlayerPrev<CR>
 map <F8> :MPlayerNext<CR>
-map <F7> :MPlayerTogglePause<CR>
-map <F7> :CtrlPMPlayer<CR>
+map <F9> :MPlayerTogglePause<CR>
+map <F10> :CtrlPMPlayer<CR>
 
 
 augroup MPlayer
