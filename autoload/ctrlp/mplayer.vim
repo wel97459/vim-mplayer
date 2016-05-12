@@ -42,8 +42,6 @@ function! ctrlp#mplayer#start(...) abort
   endif
 
   let glob_pattern = '.*\.\(' . join(s:suffixes, '\|') . '\|m3u\|m3u8\|pls\|wax\|wpl\|xspf\)$'  
-  echom glob_pattern
-  echom dir
 
   let files  = globpath(dir, "**", 0, 1)
   
