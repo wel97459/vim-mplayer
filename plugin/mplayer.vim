@@ -38,11 +38,19 @@ command! -bar -nargs=? -complete=customlist,mplayer#help_complete  MPlayerHelp c
 
 command! -bar -nargs=0 MPlayerFlush call mplayer#flush()
 
-command! -nargs=? -complete=dir CtrlPMPlayer  call ctrlp#mplayer#start(<f-args>)
+command! -nargs=? -complete=dir CtrlPPL  call ctrlp#mplayer#playlist(<f-args>)
+command! -nargs=? -complete=dir CtrlPFiles  call ctrlp#mplayer#files(<f-args>)
+
 command! -nargs=? -complete=dir AltiMPlayer  call alti#mplayer#start(<f-args>)
 command! -nargs=? -complete=dir MilqiMPlayer  call milqi#mplayer#start(<f-args>)
 command! -nargs=? -complete=dir FZFMPlayer  call fzf#mplayer#start(<f-args>)
 
+map <F6> :MPlayerStop<CR>
+map <F7> :MPlayerPrev<CR>
+map <F8> :MPlayerNext<CR>
+map <F9> :MPlayerTogglePause<CR>
+map <F10> :CtrlPPL<CR>
+map <F5> :CtrlPFiles<CR>
 
 augroup MPlayer
   autocmd!

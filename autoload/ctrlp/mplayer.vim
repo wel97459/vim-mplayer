@@ -20,7 +20,7 @@ let s:mplayer_vars = {
       \ 'lname': 'mplayer',
       \ 'sname': 'mplayer',
       \ 'type': 'path',
-      \ 'sort': 0,
+      \ 'sort': 1,
       \ 'nolim': 1,
       \ 'multsel': 1,
       \ 'opmul': 1
@@ -32,20 +32,75 @@ else
   let g:ctrlp_ext_vars = [s:mplayer_vars]
 endif
 
-function! ctrlp#mplayer#start(...) abort
+let s:candidate = []
+let s:suffixes = ['mp3', 'flac', 'wav']
+let s:bwtype = 0
+
+function! ctrlp#mplayer#playlist(...) abort
+ let dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
+  if dir[-1 :] !=# '/'
+    let dir .= '/'
+  endif
+
+"  let glob_pattern = '\.\%(' . join(s:suffixes, '\|') . 'm3u\|m3u8\|pls\|wax\|wpl\|xspf\)$'  
+  let glob_pattern = '\.\%(m3u\|m3u8\|pls\|wax\|wpl\|xspf\)$'  
+  echom glob_pattern
+  echom dir
+
+  let files  = globpath(dir, "**", 0, 1)
+  
+  let s:candidate = []
+  
+  let i = 0
+  while i < len(files)
+    if files[i] =~# glob_pattern
+        call add(s:candidate, files[i])
+    endif
+    let i += 1
+  endwhile
+
   call ctrlp#init(ctrlp#mplayer#id())
 endfunction
 
+function! ctrlp#mplayer#files(...) abort
+    let dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
+    if dir[-1 :] !=# '/'
+      let dir .= '/'
+    endif
+
+    echom dir
+    let dirs = glob(dir . "*", 0, 1)
+    
+    let s:candidate = []
+    
+    let i = 0
+    while i < len(dirs)
+        call add(s:candidate, dirs[i])
+        let i += 1
+    endwhile
+    
+    let s:bwtype = 1
+
+    call ctrlp#init(ctrlp#mplayer#id())
+endfunction
+
 function! ctrlp#mplayer#init() abort
-  let s:candidate = ctrlp#files()
   return s:candidate
 endfunction
 
 function! ctrlp#mplayer#accept(mode, str)
   call ctrlp#exit()
-  echo [a:mode, a:str]
-  cal call('mplayer#enqueue', a:str)
+  if s:bwtype == 0
+      call mplayer#enqueue(a:str)
+  endif
+
+  if s:bwtype == 1
+      call ctrlp#mplayer#files(a:str[0])
+  endif
+"  echo a:str
+"  cal call('mplayer#enqueue', a:str)
 " call mplayer#enqueue(a:str)
+  
 endfunction
 
 function! ctrlp#mplayer#exit() abort
