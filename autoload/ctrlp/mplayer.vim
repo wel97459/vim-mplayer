@@ -64,14 +64,16 @@ endfunction
 
 function! ctrlp#mplayer#files(...) abort
     let dir = expand(a:0 > 0 ? a:1 : get(g:, 'mplayer#default_dir', '~/'))
+    
+    let s:lastDir = dir   
+    
     if dir[-1 :] !=# '/'
       let dir .= '/'
     endif
-
-    echom dir
+    
     let dirs = glob(dir . "*", 0, 1)
     
-    let s:candidate = []
+    let s:candidate = [".."]
     
     let i = 0
     while i < len(dirs)
@@ -95,11 +97,19 @@ function! ctrlp#mplayer#accept(mode, str)
   endif
 
   if s:bwtype == 1
-      call ctrlp#mplayer#files(a:str[0])
+    if a:str[0] == ".."
+        let lDir = '/' . join(split(s:lastDir, '/')[0:-2], '/')
+
+        call ctrlp#mplayer#files(lDir)
+    else
+        if filereadable(a:str[0])
+            call mplayer#enqueue(a:str)
+        else
+            
+            call ctrlp#mplayer#files(a:str[0])
+        endif
+    endif
   endif
-"  echo a:str
-"  cal call('mplayer#enqueue', a:str)
-" call mplayer#enqueue(a:str)
   
 endfunction
 
